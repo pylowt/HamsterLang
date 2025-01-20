@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is the HamsterLang interpreter, a C# implementation following the principles laid out in Thorsten Ball's *"[Writing An Interpreter In Go]"*.
+This project is the HamsterLang interpreter, a Java implementation following the principles laid out in Thorsten Ball's *"[Writing An Interpreter In Go]"*.
 **Thorsten's book is excellent and I highly recommend everyone check it out and purchase it!**
 
 The project is currently in its developmental stages, primarily serving as a way to enhance my proficiency with Java.
