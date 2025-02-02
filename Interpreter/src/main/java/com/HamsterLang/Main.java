@@ -15,7 +15,7 @@ public class Main {
             String userInput = myObj.nextLine();  // Read user input
             if (Objects.equals(userInput, "exit"))
                 break;
-//            Repl.Repl.ProcessInput(userInput);
+            Repl.processInput(userInput);
         }
     }
 }
