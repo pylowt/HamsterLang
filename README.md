@@ -30,7 +30,7 @@ MIT License
 
 ## Tech
 
-This project is implemented using a variety of technologies and tools designed to leverage the strengths of the .NET ecosystem. Below is a detailed list of the main components:
+This project is implemented using a variety of technologies and tools. Below is a detailed list of the main components:
 
 - **Java**: The primary programming language used for developing the Hamster interpreter.
 - **Maven**: A build automation and dependency management tool used to streamline the build process, manage project dependencies, and ensure consistent project configurations across environments
