@@ -58,7 +58,7 @@ public class TokenTypes {
 
     static {
         // Populating the map with keywords and their corresponding TokenType
-        Keywords.put("fn", TokenType.FUNCTION);
+        Keywords.put("func", TokenType.FUNCTION);
         Keywords.put("var", TokenType.VAR);
         Keywords.put("true", TokenType.TRUE);
         Keywords.put("false", TokenType.FALSE);

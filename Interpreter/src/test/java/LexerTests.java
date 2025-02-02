@@ -16,7 +16,7 @@ public class LexerTests {
         var input = """
                 var five = 5;
                 var ten = 10;
-                var add_? = fn(x, y) {
+                var add_? = func(x, y) {
                     x + y;
                 };
                 var result! = add(five, ten);
@@ -47,7 +47,7 @@ public class LexerTests {
                 Collections.singletonMap(TokenTypes.TokenType.VAR, "var"),
                 Collections.singletonMap(TokenTypes.TokenType.IDENT, "add_?"),
                 Collections.singletonMap(TokenTypes.TokenType.ASSIGN, "="),
-                Collections.singletonMap(TokenTypes.TokenType.FUNCTION, "fn"),
+                Collections.singletonMap(TokenTypes.TokenType.FUNCTION, "func"),
                 Collections.singletonMap(TokenTypes.TokenType.LPAREN, "("),
                 Collections.singletonMap(TokenTypes.TokenType.IDENT, "x"),
                 Collections.singletonMap(TokenTypes.TokenType.COMMA, ","),
