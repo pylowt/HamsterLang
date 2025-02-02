@@ -1,16 +1,19 @@
 import com.HamsterLang.TokenTypes;
+import com.HamsterLang.Lexer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class LexerTests {
 
     @Test
     @DisplayName("Lexer gets correct token?")
     void lexerGetsNextToken() {
-        String input = """
+        var input = """
                 var five = 5;
                 var ten = 10;
                 var add_? = fn(x, y) {
@@ -106,6 +109,18 @@ public class LexerTests {
                 Collections.singletonMap(TokenTypes.TokenType.SEMICOLON, ";"),
                 Collections.singletonMap(TokenTypes.TokenType.EOF, ""),
         };
+
+        var lexer = new Lexer(input);
+        for (var entry : tests)
+        {
+            var result = lexer.nextToken();
+            var entryKey = entry.keySet().iterator().next();
+            var typeMessage = result.Type + " - TokenType wrong. Expected " + entryKey;
+            assertEquals(entryKey, result.Type, typeMessage);
+            var entryValue = entry.values().iterator().next();
+            var literalMessage = result.Literal + " - Literal wrong. Expected " + entryValue;
+            assertEquals(entryValue, result.Literal, literalMessage);
+        }
 
     }
 }
