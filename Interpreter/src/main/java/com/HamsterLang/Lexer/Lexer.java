@@ -1,4 +1,7 @@
-package com.HamsterLang;
+package com.HamsterLang.Lexer;
+
+import com.HamsterLang.Tokens.Token;
+import com.HamsterLang.Tokens.TokenTypes;
 
 public class Lexer {
     private final String input;

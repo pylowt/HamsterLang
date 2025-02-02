@@ -1,7 +1,7 @@
-package com.HamsterLang;
+package com.HamsterLang.Tokens;
 
 public class Token {
-    public  TokenTypes.TokenType Type;
+    public TokenTypes.TokenType Type;
     public  String Literal;
 
     public Token(TokenTypes.TokenType type, String literal)

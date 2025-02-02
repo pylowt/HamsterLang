@@ -1,5 +1,5 @@
-import com.HamsterLang.TokenTypes;
-import com.HamsterLang.Lexer;
+import com.HamsterLang.Tokens.TokenTypes;
+import com.HamsterLang.Lexer.Lexer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,5 +1,8 @@
 package com.HamsterLang;
 
+import com.HamsterLang.Lexer.Lexer;
+import com.HamsterLang.Tokens.TokenTypes;
+
 public class Repl {
     public static void processInput(String input)
     {

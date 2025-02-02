@@ -1,4 +1,4 @@
-package com.HamsterLang;
+package com.HamsterLang.Tokens;
 
 import java.util.HashMap;
 import java.util.Map;
