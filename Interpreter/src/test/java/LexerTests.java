@@ -1,12 +1,12 @@
-import com.HamsterLang.Tokens.TokenTypes;
 import com.HamsterLang.Lexer.Lexer;
+import com.HamsterLang.Tokens.TokenTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LexerTests {
 
