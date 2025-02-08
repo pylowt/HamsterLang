@@ -4,8 +4,10 @@ import com.HamsterLang.Tokens.Token;
 
 public class Statement implements ASTNode {
 
+    public Identifier name;
     private Token token;
 
+    public Statement(Token token){this.token = token;}
     public String tokenLiteral()
     {
         return token.Literal;
