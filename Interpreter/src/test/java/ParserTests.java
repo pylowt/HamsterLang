@@ -1,4 +1,5 @@
 import com.HamsterLang.Ast.ASTRoot;
+import com.HamsterLang.Ast.ReturnStatement;
 import com.HamsterLang.Ast.VarStatement;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Parser.Parser;
@@ -15,9 +16,9 @@ public class ParserTests {
         var lexer = new Lexer(input);
         parser = new Parser(lexer);
         program = parser.parseProgram();
-        CheckParserErrors();
+        checkParserErrors();
     }
-    private void CheckParserErrors()
+    private void checkParserErrors()
     {
         var errors = parser.errors;
         assertFalse(errors.size() != 0, "Parser Error: " + String.join(" ", errors));
@@ -41,5 +42,19 @@ public class ParserTests {
             assertEquals("var", statement.tokenLiteral());
         }
     }
-
+    
+    @Test
+    void TestReturnStatements(){
+       var input = """
+               return 5;
+               return 10;
+               return 993322;
+               """;
+       initialise(input);
+       assertEquals(3, program.statements.size());
+        for (var stmnt: program.statements) {
+            assertInstanceOf(ReturnStatement.class, stmnt);
+            assertEquals("return", stmnt.tokenLiteral());
+        }
+    }
 }
