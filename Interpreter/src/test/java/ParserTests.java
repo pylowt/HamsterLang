@@ -52,9 +52,9 @@ public class ParserTests {
                """;
        initialise(input);
        assertEquals(3, program.statements.size());
-        for (var stmnt: program.statements) {
-            assertInstanceOf(ReturnStatement.class, stmnt);
-            assertEquals("return", stmnt.tokenLiteral());
+        for (var stmt: program.statements) {
+            assertInstanceOf(ReturnStatement.class, stmt);
+            assertEquals("return", stmt.tokenLiteral());
         }
     }
 }
