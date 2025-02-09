@@ -5,24 +5,23 @@ import com.HamsterLang.Tokens.Token;
 public class Statement implements ASTNode {
 
     public Identifier name;
-    private Token token;
+    private final Token token;
 
-    public Statement(Token token){this.token = token;}
-    public String tokenLiteral()
-    {
+    public Statement(Token token) {
+        this.token = token;
+    }
+
+    public Statement(Token token, Identifier name) {
+        this.token = token;
+        this.name = name;
+    }
+
+    public String tokenLiteral() {
         return token.Literal;
     }
 
-    public String string()
-    {
+    public String string() {
         return "";
     }
 
-    public Token getToken() {
-        return token;
-    }
-
-    public void setToken(Token token) {
-        this.token = token;
-    }
 }

@@ -10,6 +10,11 @@ public class VarStatement extends Statement {
         super(token);
     }
 
+    public VarStatement(Token token, Identifier name, ASTNode value) {
+        super(token, name);
+        this.value = value;
+    }
+
     public String string()
     {
         var outString = tokenLiteral() + " ";

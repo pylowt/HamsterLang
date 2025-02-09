@@ -2,7 +2,7 @@ package com.HamsterLang.Ast;
 
 import com.HamsterLang.Tokens.Token;
 
-public class Identifier {
+public class Identifier implements ASTNode {
     private final Token token;
 
     public String value;
