@@ -6,12 +6,17 @@ import com.HamsterLang.Tokens.Token;
 import com.HamsterLang.Tokens.TokenTypes.TokenType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Parser {
     private final Lexer lexer;
     private Token curToken;
     private Token peekToken;
     public ArrayList<String> errors;
+    private Map<TokenType, PrefixParseFn> prefixParseFns;
+    private Map<TokenType, InfixParseFn> infixParseFns;
+    public ArrayList<Statement> statements = new ArrayList<>();
 
     public Parser(Lexer l)
     {
@@ -19,6 +24,8 @@ public class Parser {
         this.errors = new ArrayList<>();
         nextToken();
         nextToken();
+
+
     }
 
     private void nextToken()
