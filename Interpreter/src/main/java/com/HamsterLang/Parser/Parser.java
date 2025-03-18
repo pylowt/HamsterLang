@@ -14,8 +14,8 @@ public class Parser {
     private Token curToken;
     private Token peekToken;
     public ArrayList<String> errors;
-    private Map<TokenType, PrefixParseFn> prefixParseFns;
-    private Map<TokenType, InfixParseFn> infixParseFns;
+    private Map<TokenType, PrefixParseFn> prefixParseFns = new HashMap<>();
+    private Map<TokenType, InfixParseFn> infixParseFns = new HashMap<>();
     public ArrayList<Statement> statements = new ArrayList<>();
 
     public Parser(Lexer l)
@@ -116,5 +116,12 @@ public class Parser {
             String message = "Expected next token to be " + t + " got " + peekToken.Type + " instead";
             errors.add(message);
         }
-    }
+
+        private void RegisterPrefix(TokenType tokenType, PrefixParseFn fn) {
+            prefixParseFns.put(tokenType, fn);
+        }
+        private void RegisterInfix(TokenType tokenType, InfixParseFn fn) {
+             infixParseFns.put(tokenType, fn);
+        }
+}
 
