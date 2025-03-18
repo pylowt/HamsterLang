@@ -1,7 +1,4 @@
-import com.HamsterLang.Ast.ASTRoot;
-import com.HamsterLang.Ast.Identifier;
-import com.HamsterLang.Ast.ReturnStatement;
-import com.HamsterLang.Ast.VarStatement;
+import com.HamsterLang.Ast.*;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Parser.Parser;
 import com.HamsterLang.Tokens.Token;
@@ -41,7 +38,7 @@ public class ParserTests {
         assertEquals(3, statements.size());
         for (int i = 0; i != expectedStatements.length; i++) {
             var statement = assertInstanceOf(VarStatement.class, statements.get(i));
-            assertEquals(expectedStatements[i], statement.name.value);
+            assertEquals(expectedStatements[i], statement.name.getValue());
             assertEquals("var", statement.tokenLiteral());
         }
     }
@@ -74,5 +71,23 @@ public class ParserTests {
         var expected = "var myVar = differentVar;";
         var actual = program.string();
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void TestIdentifierExpression() {
+        var input = "foobar;";
+
+        initialise(input);
+        assertEquals(1, program.statements.size());
+        var stmt = program.statements.get(0);
+        assertInstanceOf(ExpressionStatement.class, stmt);
+        var expressionStatement = (ExpressionStatement) stmt;
+        var ident = (Identifier) expressionStatement.getExpression();
+        assertInstanceOf(Identifier.class, ident);
+        var value = ident.getValue();
+        assertEquals("foobar", value);
+        var tokenLiteral = ident.tokenLiteral();
+        assertEquals("foobar", tokenLiteral);
+
     }
 }
