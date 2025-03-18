@@ -4,6 +4,8 @@ import com.HamsterLang.Ast.*;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Tokens.Token;
 import com.HamsterLang.Tokens.TokenTypes.TokenType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +19,16 @@ public class Parser {
     private Map<TokenType, PrefixParseFn> prefixParseFns = new HashMap<>();
     private Map<TokenType, InfixParseFn> infixParseFns = new HashMap<>();
     public ArrayList<Statement> statements = new ArrayList<>();
+    private enum Precedents {
+        _skip,
+        LOWEST,
+        EQUALS,
+        LESSGREATER,
+        SUM,
+        PRODUCT,
+        PREFIX,
+        CALL
+    }
 
     public Parser(Lexer l)
     {
@@ -24,9 +36,10 @@ public class Parser {
         this.errors = new ArrayList<>();
         nextToken();
         nextToken();
-
-
+        prefixParseFns.put(TokenType.IDENT, parseIdentifierFn);
     }
+
+    PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
 
     private void nextToken()
     {
@@ -55,11 +68,28 @@ public class Parser {
         return switch (curToken.Type) {
             case VAR -> parseVarStatement();
             case RETURN -> parseReturnStatement();
-            default -> null;
+            default -> parseExpressionStatement();
         };
     }
 
-        private VarStatement parseVarStatement()
+    private @NotNull ExpressionStatement parseExpressionStatement() {
+        var stmnt = new ExpressionStatement(curToken);
+        stmnt.setExpression(parseExpression(Precedents.LOWEST.ordinal()));
+        if (peekTokenIs(TokenType.SEMICOLON)) {
+            nextToken();
+        }
+        return stmnt;
+    }
+
+    private @Nullable Expression parseExpression(int precedence) {
+        PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
+        if (prefix == null) {
+            return null;
+        }
+        return prefix.parse();
+    }
+
+    private @Nullable VarStatement parseVarStatement()
     {
         var stmt = new VarStatement(curToken);
 
@@ -79,7 +109,7 @@ public class Parser {
         return stmt;
     }
 
-        private ReturnStatement parseReturnStatement()
+        private @NotNull ReturnStatement parseReturnStatement()
         {
             var stmt = new ReturnStatement(curToken);
             // TODO: Skipping the expressions until encounter a semicolon
