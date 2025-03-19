@@ -4,14 +4,31 @@ import com.HamsterLang.Ast.*;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Tokens.Token;
 import com.HamsterLang.Tokens.TokenTypes.TokenType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Parser {
     private final Lexer lexer;
     private Token curToken;
     private Token peekToken;
     public ArrayList<String> errors;
+    private Map<TokenType, PrefixParseFn> prefixParseFns = new HashMap<>();
+    private Map<TokenType, InfixParseFn> infixParseFns = new HashMap<>();
+    public ArrayList<Statement> statements = new ArrayList<>();
+    private enum Precedents {
+        _skip,
+        LOWEST,
+        EQUALS,
+        LESSGREATER,
+        SUM,
+        PRODUCT,
+        PREFIX,
+        CALL
+    }
 
     public Parser(Lexer l)
     {
@@ -19,6 +36,24 @@ public class Parser {
         this.errors = new ArrayList<>();
         nextToken();
         nextToken();
+        prefixParseFns.put(TokenType.IDENT, parseIdentifierFn);
+        prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
+    }
+
+    PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
+    PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
+
+    private @Nullable Expression parseIntegerLiteral() {
+        var lit = new IntegerLiteral(curToken);
+        long parsedValue;
+        try {
+            parsedValue = Long.parseLong(curToken.Literal);
+        } catch (NumberFormatException e) {
+            errors.add("Could not parse " + curToken.Literal + " as integer");
+            return null;
+        }
+        lit.setValue(parsedValue);
+        return lit;
     }
 
     private void nextToken()
@@ -48,11 +83,28 @@ public class Parser {
         return switch (curToken.Type) {
             case VAR -> parseVarStatement();
             case RETURN -> parseReturnStatement();
-            default -> null;
+            default -> parseExpressionStatement();
         };
     }
 
-        private VarStatement parseVarStatement()
+    private @NotNull ExpressionStatement parseExpressionStatement() {
+        var stmnt = new ExpressionStatement(curToken);
+        stmnt.setExpression(parseExpression(Precedents.LOWEST.ordinal()));
+        if (peekTokenIs(TokenType.SEMICOLON)) {
+            nextToken();
+        }
+        return stmnt;
+    }
+
+    private @Nullable Expression parseExpression(int precedence) {
+        PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
+        if (prefix == null) {
+            return null;
+        }
+        return prefix.parse();
+    }
+
+    private @Nullable VarStatement parseVarStatement()
     {
         var stmt = new VarStatement(curToken);
 
@@ -72,7 +124,7 @@ public class Parser {
         return stmt;
     }
 
-        private ReturnStatement parseReturnStatement()
+        private @NotNull ReturnStatement parseReturnStatement()
         {
             var stmt = new ReturnStatement(curToken);
             // TODO: Skipping the expressions until encounter a semicolon
@@ -109,5 +161,12 @@ public class Parser {
             String message = "Expected next token to be " + t + " got " + peekToken.Type + " instead";
             errors.add(message);
         }
-    }
+
+        private void RegisterPrefix(TokenType tokenType, PrefixParseFn fn) {
+            prefixParseFns.put(tokenType, fn);
+        }
+        private void RegisterInfix(TokenType tokenType, InfixParseFn fn) {
+             infixParseFns.put(tokenType, fn);
+        }
+}
 
