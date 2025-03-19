@@ -90,4 +90,21 @@ public class ParserTests {
         assertEquals("foobar", tokenLiteral);
 
     }
+    @Test
+    void TestIntegerLiteralExpression() {
+        var input = "5;";
+
+        initialise(input);
+        assertEquals(1, program.statements.size());
+        var stmt = program.statements.get(0);
+        assertInstanceOf(ExpressionStatement.class, stmt);
+        var expressionStatement = (ExpressionStatement) stmt;
+        var intLiteral = (IntegerLiteral) expressionStatement.getExpression();
+        assertInstanceOf(IntegerLiteral.class, intLiteral);
+        long value = intLiteral.getValue();
+        assertEquals(5, value);
+        var tokenLiteral = intLiteral.tokenLiteral();
+        assertEquals("5", tokenLiteral);
+
+    }
 }
