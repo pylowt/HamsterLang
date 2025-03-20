@@ -36,6 +36,10 @@ public class Parser {
         this.errors = new ArrayList<>();
         nextToken();
         nextToken();
+        registerPrefixFunctions();
+    }
+
+    private void registerPrefixFunctions() {
         prefixParseFns.put(TokenType.IDENT, parseIdentifierFn);
         prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
         prefixParseFns.put(TokenType.BANG, parsePrefixExpressionFn);
@@ -44,19 +48,16 @@ public class Parser {
 
     PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
     PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
-
     PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
 
     private @Nullable Expression parseIntegerLiteral() {
         var lit = new IntegerLiteral(curToken);
-        long parsedValue;
         try {
-            parsedValue = Long.parseLong(curToken.Literal);
+            lit.setValue(Long.parseLong(curToken.Literal));
         } catch (NumberFormatException e) {
             errors.add("Could not parse " + curToken.Literal + " as integer");
             return null;
         }
-        lit.setValue(parsedValue);
         return lit;
     }
 
