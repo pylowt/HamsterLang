@@ -7,6 +7,11 @@ public class PrefixExpression extends Expression {
     private String operator;
     private Expression right;
 
+    public PrefixExpression(Token curToken, String operator) {
+        this.token = curToken;
+        this.operator = operator;
+    }
+
     public void expressionNode() {}
     public String tokenLiteral() {
         return token.Literal;
@@ -24,5 +29,9 @@ public class PrefixExpression extends Expression {
 
     public Expression getRight() {
         return this.right;
+    }
+
+    public void setRight(Expression exp) {
+        this.right = exp;
     }
 }
