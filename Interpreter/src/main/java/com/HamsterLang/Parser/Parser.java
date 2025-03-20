@@ -38,10 +38,14 @@ public class Parser {
         nextToken();
         prefixParseFns.put(TokenType.IDENT, parseIdentifierFn);
         prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
+        prefixParseFns.put(TokenType.BANG, parsePrefixExpressionFn);
+        prefixParseFns.put(TokenType.MINUS, parsePrefixExpressionFn);
     }
 
     PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
     PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
+
+    PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
 
     private @Nullable Expression parseIntegerLiteral() {
         var lit = new IntegerLiteral(curToken);
@@ -54,6 +58,13 @@ public class Parser {
         }
         lit.setValue(parsedValue);
         return lit;
+    }
+
+    private @NotNull Expression parsePrefixExpression(){
+       var expression = new PrefixExpression(curToken, curToken.Literal);
+       nextToken();
+       expression.setRight(parseExpression(Precedents.PREFIX.ordinal()));
+       return expression;
     }
 
     private void nextToken()
@@ -99,9 +110,12 @@ public class Parser {
     private @Nullable Expression parseExpression(int precedence) {
         PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
         if (prefix == null) {
+            noPrefixParseFnError(curToken.Type);
             return null;
         }
-        return prefix.parse();
+        Expression leftExp;
+        leftExp = prefix.parse();
+        return leftExp;
     }
 
     private @Nullable VarStatement parseVarStatement()
@@ -168,5 +182,11 @@ public class Parser {
         private void RegisterInfix(TokenType tokenType, InfixParseFn fn) {
              infixParseFns.put(tokenType, fn);
         }
+
+        private void noPrefixParseFnError(TokenType t) {
+            errors.add("No prefix parse function for " + t.getSymbol());
+        }
+
+
 }
 
