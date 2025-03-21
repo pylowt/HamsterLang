@@ -3,8 +3,8 @@ package com.HamsterLang.Ast;
 import com.HamsterLang.Tokens.Token;
 
 public class PrefixExpression extends Expression {
-    Token token;
-    private String operator;
+    private final Token token;
+    private final String operator;
     private Expression right;
 
     public PrefixExpression(Token curToken, String operator) {
