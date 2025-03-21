@@ -3,10 +3,17 @@ package com.HamsterLang.Ast;
 import com.HamsterLang.Tokens.Token;
 
 public class InfixExpression extends Expression{
-    private Token token;
-    private Expression left;
-    private String operator;
+    private final Token token;
+    private final Expression left;
+    private final String operator;
     private Expression right;
+
+    public InfixExpression(Token token, String literal, Expression left) {
+        this.token = token;
+        this.operator = literal;
+        this.left = left;
+
+    }
 
     public String getOperator() {
         return operator;
@@ -27,5 +34,13 @@ public class InfixExpression extends Expression{
                 " " +
                 right.string() +
                 ")";
+    }
+
+    public void setRight(Expression right) {
+        this.right = right;
+    }
+
+    public Token getToken() {
+        return token;
     }
 }
