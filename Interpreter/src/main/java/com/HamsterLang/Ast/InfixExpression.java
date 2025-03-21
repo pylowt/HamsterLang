@@ -18,4 +18,14 @@ public class InfixExpression extends Expression{
     public Expression getRight() {
         return right;
     }
+
+   public String string() {
+        return "(" +
+                left.string() +
+                " " +
+                operator +
+                " " +
+                right.string() +
+                ")";
+    }
 }
