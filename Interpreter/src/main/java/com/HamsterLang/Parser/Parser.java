@@ -16,9 +16,9 @@ public class Parser {
     private Token curToken;
     private Token peekToken;
     public ArrayList<String> errors;
-    private Map<TokenType, PrefixParseFn> prefixParseFns = new HashMap<>();
-    private Map<TokenType, InfixParseFn> infixParseFns = new HashMap<>();
-    public ArrayList<Statement> statements = new ArrayList<>();
+    private final Map<TokenType, PrefixParseFn> prefixParseFns = new HashMap<>();
+    private final Map<TokenType, InfixParseFn> infixParseFns = new HashMap<>();
+    private final HashMap <TokenType, Precedents> precedences = new HashMap<>();
     private enum Precedents {
         _skip,
         LOWEST,
@@ -37,6 +37,8 @@ public class Parser {
         nextToken();
         nextToken();
         registerPrefixFunctions();
+        registerInfixFunctions();
+        intialisePrecedences();
     }
 
     private void registerPrefixFunctions() {
@@ -44,6 +46,27 @@ public class Parser {
         prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
         prefixParseFns.put(TokenType.BANG, parsePrefixExpressionFn);
         prefixParseFns.put(TokenType.MINUS, parsePrefixExpressionFn);
+    }
+    private void registerInfixFunctions() {
+        infixParseFns.put(TokenType.PLUS, this::parseInfixExpression);
+        infixParseFns.put(TokenType.MINUS, this::parseInfixExpression);
+        infixParseFns.put(TokenType.SLASH, this::parseInfixExpression);
+        infixParseFns.put(TokenType.ASTERISK, this::parseInfixExpression);
+        infixParseFns.put(TokenType.EQ, this::parseInfixExpression);
+        infixParseFns.put(TokenType.NOT_EQ, this::parseInfixExpression);
+        infixParseFns.put(TokenType.LT, this::parseInfixExpression);
+        infixParseFns.put(TokenType.GT, this::parseInfixExpression);
+    }
+
+    private void intialisePrecedences() {
+        precedences.put(TokenType.EQ, Precedents.EQUALS);
+        precedences.put(TokenType.NOT_EQ, Precedents.EQUALS);
+        precedences.put(TokenType.LT, Precedents.LESSGREATER);
+        precedences.put(TokenType.GT, Precedents.LESSGREATER);
+        precedences.put(TokenType.PLUS, Precedents.SUM);
+        precedences.put(TokenType.MINUS, Precedents.SUM);
+        precedences.put(TokenType.SLASH, Precedents.PRODUCT);
+        precedences.put(TokenType.ASTERISK, Precedents.PRODUCT);
     }
 
     PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
@@ -68,6 +91,14 @@ public class Parser {
        return expression;
     }
 
+    private @NotNull Expression parseInfixExpression(Expression left) {
+        var expression = new InfixExpression(curToken, curToken.Literal, left);
+        var precedence = curPrecedence();
+        nextToken();
+        expression.setRight(parseExpression(precedence));
+        return expression;
+    }
+
     private void nextToken()
     {
         curToken = peekToken;
@@ -90,7 +121,7 @@ public class Parser {
         return program;
     }
 
-        private Statement parseStatement()
+    private Statement parseStatement()
     {
         return switch (curToken.Type) {
             case VAR -> parseVarStatement();
@@ -116,6 +147,14 @@ public class Parser {
         }
         Expression leftExp;
         leftExp = prefix.parse();
+        for (var p = precedence; !peekTokenIs(TokenType.SEMICOLON) && p < peekPrecedence(); p++) {
+            InfixParseFn infix = infixParseFns.get(peekToken.Type);
+            if (infix == null) {
+                return leftExp;
+            }
+            nextToken();
+            leftExp = infix.parse(leftExp);
+        }
         return leftExp;
     }
 
@@ -139,8 +178,8 @@ public class Parser {
         return stmt;
     }
 
-        private @NotNull ReturnStatement parseReturnStatement()
-        {
+    private @NotNull ReturnStatement parseReturnStatement()
+    {
             var stmt = new ReturnStatement(curToken);
             // TODO: Skipping the expressions until encounter a semicolon
             while (!curTokenIs(TokenType.SEMICOLON))
@@ -150,44 +189,49 @@ public class Parser {
             return stmt;
         }
 
-        private boolean curTokenIs(TokenType t)
+    private boolean curTokenIs(TokenType t)
+    {
+        return curToken.Type == t;
+    }
+
+    private boolean peekTokenIs(TokenType t)
+    {
+        return peekToken.Type == t;
+    }
+
+    private boolean expectPeek(TokenType t)
+    {
+        if (peekTokenIs(t))
         {
-            return curToken.Type == t;
+            nextToken();
+            return true;
         }
+        PeekError(t);
+        return false;
+    }
 
-        private boolean peekTokenIs(TokenType t)
-        {
-            return peekToken.Type == t;
-        }
+    private void PeekError(TokenType t)
+    {
+        String message = "Expected next token to be " + t + " got " + peekToken.Type + " instead";
+        errors.add(message);
+    }
 
-        private boolean expectPeek(TokenType t)
-        {
-            if (peekTokenIs(t))
-            {
-                nextToken();
-                return true;
-            }
-            PeekError(t);
-            return false;
-        }
+    private void noPrefixParseFnError(TokenType t) {
+        errors.add("No prefix parse function for " + t.getSymbol());
+    }
 
-        private void PeekError(TokenType t)
-        {
-            String message = "Expected next token to be " + t + " got " + peekToken.Type + " instead";
-            errors.add(message);
+    private int peekPrecedence() {
+        if (precedences.containsKey(peekToken.Type)) {
+            return precedences.get(peekToken.Type).ordinal();
         }
+        return Precedents.LOWEST.ordinal();
+    }
 
-        private void RegisterPrefix(TokenType tokenType, PrefixParseFn fn) {
-            prefixParseFns.put(tokenType, fn);
+    private int curPrecedence() {
+        if (precedences.containsKey(curToken.Type)) {
+            return precedences.get(curToken.Type).ordinal();
         }
-        private void RegisterInfix(TokenType tokenType, InfixParseFn fn) {
-             infixParseFns.put(tokenType, fn);
-        }
-
-        private void noPrefixParseFnError(TokenType t) {
-            errors.add("No prefix parse function for " + t.getSymbol());
-        }
-
+        return Precedents.LOWEST.ordinal();
+    }
 
 }
-
