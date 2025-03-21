@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -113,25 +114,25 @@ public class ParserTests {
     }
 
 
-        static Stream<TestCase> prefixTestCases() {
-            return Stream.of(
-                    new TestCase("!5;", "!", 5),
-                    new TestCase("-15;", "-", 15)
-            );
-        }
-
         // Test case class to hold input, expected operator, and expected integer value
         static class TestCase {
             String input;
             String operator;
-            int integerValue;
+            List<Integer> operands;
 
-            TestCase(String input, String operator, int integerValue) {
+            TestCase(String input, String operator, List<Integer> operands) {
                 this.input = input;
                 this.operator = operator;
-                this.integerValue = integerValue;
+                this.operands = operands;
             }
         }
+
+    static Stream<TestCase> prefixTestCases() {
+        return Stream.of(
+                new TestCase("!5;", "!", List.of(5)),
+                new TestCase("-15;", "-", List.of(15))
+        );
+    }
 
         @ParameterizedTest
         @MethodSource("prefixTestCases")
@@ -143,12 +144,12 @@ public class ParserTests {
 
             var stmt = (ExpressionStatement) program.statements.get(0);
             assertTrue(stmt.getExpression() instanceof PrefixExpression,
-                    "stmt is not a PrefixExpression");
+                    "exp is not a PrefixExpression");
 
             PrefixExpression exp = (PrefixExpression) stmt.getExpression();
             assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
 
-            assertTrue(testIntegerLiteral(exp.getRight(), tt.integerValue));
+            assertTrue(testIntegerLiteral(exp.getRight(), tt.operands.get(0)));
         }
 
         boolean testIntegerLiteral(Expression il, long value) {
@@ -161,4 +162,37 @@ public class ParserTests {
 
             return integ.tokenLiteral().equals(String.format("%d", value));
         }
+
+        static Stream<TestCase> infixTestCases() {
+            return Stream.of(
+                    new TestCase("5 + 5;", "+", List.of(5, 5)),
+                    new TestCase("5 - 5;", "-", List.of(5, 5)),
+                    new TestCase("5 * 5;", "*", List.of(5, 5)),
+                    new TestCase("5 / 5;", "/", List.of(5, 5)),
+                    new TestCase("5 > 5;", ">", List.of(5, 5)),
+                    new TestCase("5 < 5;", "<", List.of(5, 5)),
+                    new TestCase("5 == 5;", "==", List.of(5, 5)),
+                    new TestCase("5 != 5;", "!=", List.of(5, 5))
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource("infixTestCases")
+        void testParsingInfixExpressions(TestCase tt) {
+            initialise(tt.input);
+
+            // Assert that there is exactly one statement in the program
+            assertEquals(1, program.statements.size(), "program.Statements does not contain 1 statement");
+
+            var stmt = (ExpressionStatement) program.statements.get(0);
+            assertTrue(stmt.getExpression() instanceof InfixExpression,
+                    "exp is not a InfixExpression");
+
+            InfixExpression exp = (InfixExpression) stmt.getExpression();
+            assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
+
+            assertTrue(testIntegerLiteral(exp.getLeft(), tt.operands.get(0)));
+            assertTrue(testIntegerLiteral(exp.getRight(), tt.operands.get(1)));
+        }
 }
+

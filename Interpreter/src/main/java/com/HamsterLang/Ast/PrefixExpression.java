@@ -3,16 +3,15 @@ package com.HamsterLang.Ast;
 import com.HamsterLang.Tokens.Token;
 
 public class PrefixExpression extends Expression {
-    Token token;
-    private String operator;
+    private final Token token;
+    private final String operator;
     private Expression right;
 
-    public PrefixExpression(Token curToken, String operator) {
-        this.token = curToken;
+    public PrefixExpression(Token token, String operator) {
+        this.token = token;
         this.operator = operator;
     }
 
-    public void expressionNode() {}
     public String tokenLiteral() {
         return token.Literal;
     }
