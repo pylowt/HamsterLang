@@ -7,12 +7,11 @@ public class PrefixExpression extends Expression {
     private final String operator;
     private Expression right;
 
-    public PrefixExpression(Token curToken, String operator) {
-        this.token = curToken;
+    public PrefixExpression(Token token, String operator) {
+        this.token = token;
         this.operator = operator;
     }
 
-    public void expressionNode() {}
     public String tokenLiteral() {
         return token.Literal;
     }
