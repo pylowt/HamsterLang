@@ -16,4 +16,10 @@ public class ExpressionStatement extends Statement{
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
+
+    @Override
+    public String string() {
+        if (expression != null) return expression.string();
+        return "";
+    }
 }
