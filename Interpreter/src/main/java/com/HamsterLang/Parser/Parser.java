@@ -132,7 +132,8 @@ public class Parser {
 
     private @NotNull ExpressionStatement parseExpressionStatement() {
         var stmnt = new ExpressionStatement(curToken);
-        stmnt.setExpression(parseExpression(Precedents.LOWEST.ordinal()));
+        var exp = parseExpression(Precedents.LOWEST.ordinal());
+        stmnt.setExpression(exp);
         if (peekTokenIs(TokenType.SEMICOLON)) {
             nextToken();
         }
@@ -147,7 +148,7 @@ public class Parser {
         }
         Expression leftExp;
         leftExp = prefix.parse();
-        for (var p = precedence; !peekTokenIs(TokenType.SEMICOLON) && p < peekPrecedence(); p++) {
+        while (!peekTokenIs(TokenType.SEMICOLON) && precedence < peekPrecedence()) {
             InfixParseFn infix = infixParseFns.get(peekToken.Type);
             if (infix == null) {
                 return leftExp;
@@ -162,16 +163,16 @@ public class Parser {
     {
         var stmt = new VarStatement(curToken);
 
-        if (!expectPeek(TokenType.IDENT))
+        if (expectPeek(TokenType.IDENT))
             return null;
 
         stmt.name = new Identifier(curToken, curToken.Literal);
 
-        if (!expectPeek(TokenType.ASSIGN))
+        if (expectPeek(TokenType.ASSIGN))
             return null;
 
         // TODO: Skipping the expressions until encounter a semicolon
-        while (!curTokenIs(TokenType.SEMICOLON))
+        while (curTokenIs())
         {
             nextToken();
         }
@@ -182,16 +183,16 @@ public class Parser {
     {
             var stmt = new ReturnStatement(curToken);
             // TODO: Skipping the expressions until encounter a semicolon
-            while (!curTokenIs(TokenType.SEMICOLON))
+            while (curTokenIs())
             {
                 nextToken();
             }
             return stmt;
         }
 
-    private boolean curTokenIs(TokenType t)
+    private boolean curTokenIs()
     {
-        return curToken.Type == t;
+        return curToken.Type != TokenType.SEMICOLON;
     }
 
     private boolean peekTokenIs(TokenType t)
@@ -204,10 +205,10 @@ public class Parser {
         if (peekTokenIs(t))
         {
             nextToken();
-            return true;
+            return false;
         }
         PeekError(t);
-        return false;
+        return true;
     }
 
     private void PeekError(TokenType t)
@@ -217,7 +218,7 @@ public class Parser {
     }
 
     private void noPrefixParseFnError(TokenType t) {
-        errors.add("No prefix parse function for " + t.getSymbol());
+        errors.add("No prefix parse function for " + t.getSymbol() + " found.");
     }
 
     private int peekPrecedence() {
