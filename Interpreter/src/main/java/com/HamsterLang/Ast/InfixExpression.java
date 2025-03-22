@@ -26,8 +26,9 @@ public class InfixExpression extends Expression{
         return right;
     }
 
-   public String string() {
-        return "(" +
+    @Override
+    public String string() {
+         return "(" +
                 left.string() +
                 " " +
                 operator +
