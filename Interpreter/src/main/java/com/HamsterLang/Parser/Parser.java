@@ -29,6 +29,7 @@ public class Parser {
         PREFIX,
         CALL
     }
+    private final Tracer tracer = new Tracer();
 
     public Parser(Lexer l)
     {
@@ -74,29 +75,44 @@ public class Parser {
     PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
 
     private @Nullable Expression parseIntegerLiteral() {
-        var lit = new IntegerLiteral(curToken);
+        tracer.trace("parseIntegerLiteral");
         try {
-            lit.setValue(Long.parseLong(curToken.Literal));
-        } catch (NumberFormatException e) {
-            errors.add("Could not parse " + curToken.Literal + " as integer");
-            return null;
+            var lit = new IntegerLiteral(curToken);
+            try {
+                lit.setValue(Long.parseLong(curToken.Literal));
+            } catch (NumberFormatException e) {
+                errors.add("Could not parse " + curToken.Literal + " as integer");
+                return null;
+            }
+            return lit;
+        } finally {
+            tracer.untrace("parseIntegerLiteral");
         }
-        return lit;
     }
 
     private @NotNull Expression parsePrefixExpression(){
-       var expression = new PrefixExpression(curToken, curToken.Literal);
-       nextToken();
-       expression.setRight(parseExpression(Precedents.PREFIX.ordinal()));
-       return expression;
+        tracer.trace("parsePrefixExpression");
+        try {
+            var expression = new PrefixExpression(curToken, curToken.Literal);
+            nextToken();
+            expression.setRight(parseExpression(Precedents.PREFIX.ordinal()));
+            return expression;
+        } finally {
+            tracer.untrace("parsePrefixExpression");
+        }
     }
 
     private @NotNull Expression parseInfixExpression(Expression left) {
-        var expression = new InfixExpression(curToken, curToken.Literal, left);
-        var precedence = curPrecedence();
-        nextToken();
-        expression.setRight(parseExpression(precedence));
-        return expression;
+        tracer.trace("parseInfixExpression");
+        try {
+            var expression = new InfixExpression(curToken, curToken.Literal, left);
+            var precedence = curPrecedence();
+            nextToken();
+            expression.setRight(parseExpression(precedence));
+            return expression;
+        } finally {
+            tracer.untrace("parseInfixExpression");
+        }
     }
 
     private void nextToken()
@@ -131,32 +147,43 @@ public class Parser {
     }
 
     private @NotNull ExpressionStatement parseExpressionStatement() {
-        var stmnt = new ExpressionStatement(curToken);
-        var exp = parseExpression(Precedents.LOWEST.ordinal());
-        stmnt.setExpression(exp);
-        if (peekTokenIs(TokenType.SEMICOLON)) {
-            nextToken();
+//        TODO create a method that takes a Callable or Runnable and handles the tracing logic
+        tracer.trace("parseExpressionStatement");
+        try {
+            var stmnt = new ExpressionStatement(curToken);
+            var exp = parseExpression(Precedents.LOWEST.ordinal());
+            stmnt.setExpression(exp);
+            if (peekTokenIs(TokenType.SEMICOLON)) {
+                nextToken();
+            }
+            return stmnt;
+        } finally {
+            tracer.untrace("parseExpressionStatement");
         }
-        return stmnt;
     }
 
     private @Nullable Expression parseExpression(int precedence) {
-        PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
-        if (prefix == null) {
-            noPrefixParseFnError(curToken.Type);
-            return null;
-        }
-        Expression leftExp;
-        leftExp = prefix.parse();
-        while (!peekTokenIs(TokenType.SEMICOLON) && precedence < peekPrecedence()) {
-            InfixParseFn infix = infixParseFns.get(peekToken.Type);
-            if (infix == null) {
-                return leftExp;
+        tracer.trace("parseExpression");
+        try {
+            PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
+            if (prefix == null) {
+                noPrefixParseFnError(curToken.Type);
+                return null;
             }
-            nextToken();
-            leftExp = infix.parse(leftExp);
+            Expression leftExp;
+            leftExp = prefix.parse();
+            while (!peekTokenIs(TokenType.SEMICOLON) && precedence < peekPrecedence()) {
+                InfixParseFn infix = infixParseFns.get(peekToken.Type);
+                if (infix == null) {
+                    return leftExp;
+                }
+                nextToken();
+                leftExp = infix.parse(leftExp);
+            }
+            return leftExp;
+        } finally {
+            tracer.untrace("parseExpression");
         }
-        return leftExp;
     }
 
     private @Nullable VarStatement parseVarStatement()
