@@ -20,10 +20,9 @@ public class Tracer {
         traceLevel--;
     }
 
-    public String trace(String message){
+    public void trace(String message){
         incIdent();
         tracePrint("BEGIN " + message);
-        return message;
     }
 
     public void untrace(String message){
