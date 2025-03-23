@@ -20,14 +20,14 @@ public class Tracer {
         traceLevel--;
     }
 
-    public String trace (String message){
+    public String trace(String message){
         incIdent();
-        tracePrint(message);
+        tracePrint("BEGIN " + message);
         return message;
     }
 
     public void untrace(String message){
-        tracePrint("END" + message);
+        tracePrint("END " + message);
         decIdent();
     }
 
