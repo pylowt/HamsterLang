@@ -47,7 +47,10 @@ public class Parser {
         prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
         prefixParseFns.put(TokenType.BANG, parsePrefixExpressionFn);
         prefixParseFns.put(TokenType.MINUS, parsePrefixExpressionFn);
+        prefixParseFns.put(TokenType.TRUE, parseBooleanFn);
+        prefixParseFns.put(TokenType.FALSE, parseBooleanFn);
     }
+
     private void registerInfixFunctions() {
         infixParseFns.put(TokenType.PLUS, this::parseInfixExpression);
         infixParseFns.put(TokenType.MINUS, this::parseInfixExpression);
@@ -73,6 +76,7 @@ public class Parser {
     PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
     PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
     PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
+    PrefixParseFn parseBooleanFn = this::parseBoolean;
 
     private @Nullable Expression parseIntegerLiteral() {
         tracer.trace("parseIntegerLiteral");
@@ -115,6 +119,9 @@ public class Parser {
         }
     }
 
+    private @NotNull Expression parseBoolean() {
+        return new BooleanLiteral(curToken, curTokenIs());
+    }
     private void nextToken()
     {
         curToken = peekToken;
@@ -209,7 +216,6 @@ public class Parser {
     private @NotNull ReturnStatement parseReturnStatement()
     {
             var stmt = new ReturnStatement(curToken);
-            // TODO: Skipping the expressions until encounter a semicolon
             while (curTokenIs())
             {
                 nextToken();
