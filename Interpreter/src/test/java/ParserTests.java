@@ -166,19 +166,9 @@ public class ParserTests {
         PrefixExpression exp = (PrefixExpression) stmt.getExpression();
         assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
 
-        assertTrue(testIntegerLiteral(exp.getRight(), tt.operands.get(0)));
+        assertTrue(testLiteralExpression(exp.getRight(), tt.operands.get(0)));
     }
 
-    boolean testIntegerLiteral(Expression il, long value) {
-        if (!(il instanceof IntegerLiteral integ)) {
-            return false;
-        }
-        if (integ.getValue() != value) {
-            return false;
-        }
-
-        return integ.tokenLiteral().equals(String.format("%d", value));
-    }
 
     static Stream<InfixPrefixTestCase> infixTestCases() {
         return Stream.of(
@@ -210,6 +200,8 @@ public class ParserTests {
 
         assertTrue(testIntegerLiteral(exp.getLeft(), tt.operands.get(0)));
         assertTrue(testIntegerLiteral(exp.getRight(), tt.operands.get(1)));
+
+        assertTrue(testInfixExpression(exp, exp.getLeft(), exp.getOperator(), exp.getRight()));
     }
 
     static Stream<OperatorPrecedenceTestCase> operatorPrecedenceTestCases() {
@@ -237,6 +229,17 @@ public class ParserTests {
         assertEquals(tt.expected, program.string());
     }
 
+    boolean testIntegerLiteral(Expression il, long value) {
+        if (!(il instanceof IntegerLiteral integ)) {
+            return false;
+        }
+        if (integ.getValue() != value) {
+            return false;
+        }
+
+        return integ.tokenLiteral().equals(String.format("%d", value));
+    }
+
     boolean testIdentifier(Expression exp, String value) {
         if (!(exp instanceof Identifier ident)) {
             return false;
@@ -248,8 +251,8 @@ public class ParserTests {
     }
 
     boolean testLiteralExpression(Expression exp, Object expected) {
-        if (expected instanceof Integer expectedInt) {
-            return testIntegerLiteral(exp, expectedInt);
+        if (expected instanceof IntegerLiteral expectedInt) {
+            return testIntegerLiteral(exp, expectedInt.getValue());
         }
         if (expected instanceof String expectedString) {
             return testIdentifier(exp, expectedString);
