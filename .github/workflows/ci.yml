@@ -21,14 +21,14 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Change dir to dir with gradlew
-      run: cd interpreter/
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      working-directory: Interpreter
 
     - name: Build with Gradle
       run: ./gradlew build
+      working-directory: Interpreter
 
     - name: Run tests
       run: ./gradlew test
+      working-directory: Interpreter
