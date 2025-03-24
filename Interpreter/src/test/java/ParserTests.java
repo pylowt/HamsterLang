@@ -101,15 +101,24 @@ public class ParserTests {
         var input = "5;";
 
         initialise(input);
+
         assertEquals(1, program.statements.size());
+
         var stmt = program.statements.get(0);
+
         assertInstanceOf(ExpressionStatement.class, stmt);
+
         var expressionStatement = (ExpressionStatement) stmt;
         var intLiteral = (IntegerLiteral) expressionStatement.getExpression();
+
         assertInstanceOf(IntegerLiteral.class, intLiteral);
+
         long value = intLiteral.getValue();
+
         assertEquals(5, value);
+
         var tokenLiteral = intLiteral.tokenLiteral();
+
         assertEquals("5", tokenLiteral);
 
     }
@@ -160,13 +169,15 @@ public class ParserTests {
         assertEquals(1, program.statements.size(), "program.Statements does not contain 1 statement");
 
         var stmt = (ExpressionStatement) program.statements.get(0);
+
         assertTrue(stmt.getExpression() instanceof PrefixExpression,
                 "exp is not a PrefixExpression");
 
         PrefixExpression exp = (PrefixExpression) stmt.getExpression();
+
         assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
 
-        assertTrue(testLiteralExpression(exp.getRight(), tt.operands.get(0)));
+        testLiteralExpression(exp.getRight(), tt.operands.get(0));
     }
 
 
@@ -192,16 +203,19 @@ public class ParserTests {
         assertEquals(1, program.statements.size(), "program.Statements does not contain 1 statement");
 
         var stmt = (ExpressionStatement) program.statements.get(0);
+
         assertTrue(stmt.getExpression() instanceof InfixExpression,
                 "exp is not a InfixExpression");
 
         InfixExpression exp = (InfixExpression) stmt.getExpression();
+
         assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
 
-        assertTrue(testIntegerLiteral(exp.getLeft(), tt.operands.get(0)));
-        assertTrue(testIntegerLiteral(exp.getRight(), tt.operands.get(1)));
+        testIntegerLiteral(exp.getLeft(), tt.operands.get(0));
 
-        assertTrue(testInfixExpression(exp, exp.getLeft(), exp.getOperator(), exp.getRight()));
+        testIntegerLiteral(exp.getRight(), tt.operands.get(1));
+
+        testInfixExpression(exp, exp.getLeft(), exp.getOperator(), exp.getRight());
     }
 
     static Stream<OperatorPrecedenceTestCase> operatorPrecedenceTestCases() {
@@ -214,63 +228,68 @@ public class ParserTests {
                 new OperatorPrecedenceTestCase("a * b * c", "((a * b) * c)"),
                 new OperatorPrecedenceTestCase("a * b / c", "((a * b) / c)"),
                 new OperatorPrecedenceTestCase("a + b / c", "(a + (b / c))"),
-                new OperatorPrecedenceTestCase("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
+                new OperatorPrecedenceTestCase("a + b * c + d / e - f",
+                        "(((a + (b * c)) + (d / e)) - f)"),
                 new OperatorPrecedenceTestCase("3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"),
                 new OperatorPrecedenceTestCase("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
                 new OperatorPrecedenceTestCase("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"),
-                new OperatorPrecedenceTestCase("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))")
+                new OperatorPrecedenceTestCase("3 + 4 * 5 == 3 * 1 + 4 * 5",
+                        "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))")
         );
     }
 
     @ParameterizedTest
     @MethodSource("operatorPrecedenceTestCases")
     void testOperatorPrecedenceParsing(OperatorPrecedenceTestCase tt) {
+
         initialise(tt.input);
+
         assertEquals(tt.expected, program.string());
     }
 
-    boolean testIntegerLiteral(Expression il, long value) {
-        if (!(il instanceof IntegerLiteral integ)) {
-            return false;
-        }
-        if (integ.getValue() != value) {
-            return false;
-        }
+    void testIntegerLiteral(Expression il, long value) {
 
-        return integ.tokenLiteral().equals(String.format("%d", value));
+        assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
+
+        IntegerLiteral integ = (IntegerLiteral) il;  // Safe cast after assertion
+
+        assertEquals(value, integ.getValue(), "IntegerLiteral value does not match expected");
+
+        assertEquals(String.format("%d", value), integ.tokenLiteral(), "Token literal does not match expected value");
     }
 
-    boolean testIdentifier(Expression exp, String value) {
-        if (!(exp instanceof Identifier ident)) {
-            return false;
-        }
-        if (!ident.getValue().equals(value)) {
-            return false;
-        }
-        return ident.tokenLiteral().equals(value);
+    void testIdentifier(Expression exp, String value) {
+
+        assertInstanceOf(Identifier.class, exp, "Expression is not an Identifier");
+
+        Identifier ident = (Identifier) exp;  // Safe cast after assertion
+
+        assertEquals(value, ident.getValue());
+
+        assertEquals(value, ident.tokenLiteral());
     }
 
-    boolean testLiteralExpression(Expression exp, Object expected) {
+    void testLiteralExpression(Expression exp, Object expected) {
         if (expected instanceof IntegerLiteral expectedInt) {
-            return testIntegerLiteral(exp, expectedInt.getValue());
+            testIntegerLiteral(exp, expectedInt.getValue());
         }
         if (expected instanceof String expectedString) {
-            return testIdentifier(exp, expectedString);
+             testIdentifier(exp, expectedString);
         }
-        return false;
     }
 
-    boolean testInfixExpression(Expression exp, Object left, String operator, Object right) {
-        if (!(exp instanceof InfixExpression infix)) {
-            return false;
-        }
-        if (!testLiteralExpression(infix.getLeft(), left)) {
-            return false;
-        }
-        if (!infix.getOperator().equals(operator)) {
-            return false;
-        }
-        return testLiteralExpression(infix.getRight(), right);
+    void testInfixExpression(Expression exp, Object left, String operator, Object right) {
+
+        assertInstanceOf(InfixExpression.class, exp, "Expression is not an InfixExpression, got " +
+                exp.getClass().getName());
+
+        var infix = (InfixExpression) exp; // Safe cast after assertion
+
+        testLiteralExpression(infix.getLeft(), left);
+
+        assertEquals(infix.getOperator(), operator);
+
+        testLiteralExpression(infix.getRight(), right);
     }
 }
 
