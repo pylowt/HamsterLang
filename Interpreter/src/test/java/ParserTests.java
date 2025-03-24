@@ -236,6 +236,39 @@ public class ParserTests {
         initialise(tt.input);
         assertEquals(tt.expected, program.string());
     }
+
+    boolean testIdentifier(Expression exp, String value) {
+        if (!(exp instanceof Identifier ident)) {
+            return false;
+        }
+        if (!ident.getValue().equals(value)) {
+            return false;
+        }
+        return ident.tokenLiteral().equals(value);
+    }
+
+    boolean testLiteralExpression(Expression exp, Object expected) {
+        if (expected instanceof Integer expectedInt) {
+            return testIntegerLiteral(exp, expectedInt);
+        }
+        if (expected instanceof String expectedString) {
+            return testIdentifier(exp, expectedString);
+        }
+        return false;
+    }
+
+    boolean testInfixExpression(Expression exp, Object left, String operator, Object right) {
+        if (!(exp instanceof InfixExpression infix)) {
+            return false;
+        }
+        if (!testLiteralExpression(infix.getLeft(), left)) {
+            return false;
+        }
+        if (!infix.getOperator().equals(operator)) {
+            return false;
+        }
+        return testLiteralExpression(infix.getRight(), right);
+    }
 }
 
 
