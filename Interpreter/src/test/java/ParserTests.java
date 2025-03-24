@@ -1,4 +1,5 @@
 import com.HamsterLang.Ast.*;
+import com.HamsterLang.Ast.Boolean;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Parser.Parser;
 import com.HamsterLang.Tokens.Token;
@@ -123,6 +124,32 @@ public class ParserTests {
 
     }
 
+    @Test
+    void TestBooleanExpression() {
+        var input = "true;";
+
+        initialise(input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+        var booleanLiteral = (Boolean) expressionStatement.getExpression();
+
+        assertInstanceOf(Boolean.class, booleanLiteral);
+
+        boolean value = booleanLiteral.getValue();
+
+        assertTrue(value);
+
+        var tokenLiteral = booleanLiteral.tokenLiteral();
+
+        assertEquals("true", tokenLiteral);
+
+    }
 
     // Test case class to hold input, expected operator, and expected integer value
     static class TestCase {
@@ -291,6 +318,7 @@ public class ParserTests {
 
         testLiteralExpression(infix.getRight(), right);
     }
+
 }
 
 
