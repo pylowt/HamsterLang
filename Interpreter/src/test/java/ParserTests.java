@@ -1,5 +1,5 @@
 import com.HamsterLang.Ast.*;
-import com.HamsterLang.Ast.Boolean;
+import com.HamsterLang.Ast.BooleanLiteral;
 import com.HamsterLang.Lexer.Lexer;
 import com.HamsterLang.Parser.Parser;
 import com.HamsterLang.Tokens.Token;
@@ -137,9 +137,9 @@ public class ParserTests {
         assertInstanceOf(ExpressionStatement.class, stmt);
 
         var expressionStatement = (ExpressionStatement) stmt;
-        var booleanLiteral = (Boolean) expressionStatement.getExpression();
+        var booleanLiteral = (BooleanLiteral) expressionStatement.getExpression();
 
-        assertInstanceOf(Boolean.class, booleanLiteral);
+        assertInstanceOf(BooleanLiteral.class, booleanLiteral);
 
         boolean value = booleanLiteral.getValue();
 

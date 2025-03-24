@@ -2,11 +2,11 @@ package com.HamsterLang.Ast;
 
 import com.HamsterLang.Tokens.Token;
 
-public class Boolean extends Expression{
+public class BooleanLiteral extends Expression{
     private final Token token;
     private final boolean value;
 
-    public Boolean(Token token, boolean value) {
+    public BooleanLiteral(Token token, boolean value) {
         this.token = token;
         this.value = value;
     }
