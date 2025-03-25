@@ -120,7 +120,7 @@ public class Parser {
     }
 
     private @NotNull Expression parseBoolean() {
-        return new BooleanLiteral(curToken, curTokenIs());
+        return new BooleanLiteral(curToken, curTokenIs(TokenType.TRUE));
     }
     private void nextToken()
     {
@@ -206,7 +206,7 @@ public class Parser {
             return null;
 
         // TODO: Skipping the expressions until encounter a semicolon
-        while (curTokenIs())
+        while (!curTokenIs(TokenType.SEMICOLON))
         {
             nextToken();
         }
@@ -216,16 +216,16 @@ public class Parser {
     private @NotNull ReturnStatement parseReturnStatement()
     {
             var stmt = new ReturnStatement(curToken);
-            while (curTokenIs())
+            while (!curTokenIs(TokenType.SEMICOLON))
             {
                 nextToken();
             }
             return stmt;
         }
 
-    private boolean curTokenIs()
+    private boolean curTokenIs(TokenType t)
     {
-        return curToken.Type != TokenType.SEMICOLON;
+        return curToken.Type == t;
     }
 
     private boolean peekTokenIs(TokenType t)
