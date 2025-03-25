@@ -151,35 +151,6 @@ public class ParserTests {
 
     }
 
-    // Test case class to hold input, expected operator, and expected integer value
-    static class TestCase {
-        String input;
-
-        TestCase(String input) {
-            this.input = input;
-        }
-    }
-
-    static class InfixPrefixTestCase extends TestCase {
-        String operator;
-        List<Object> operands;
-
-        InfixPrefixTestCase(String input, String operator, List<Object> operands) {
-            super(input);
-            this.operator = operator;
-            this.operands = operands;
-        }
-    }
-
-    static class OperatorPrecedenceTestCase extends TestCase {
-        String expected;
-
-        OperatorPrecedenceTestCase(String input, String expected) {
-            super(input);
-            this.expected = expected;
-        }
-    }
-
     static Stream<InfixPrefixTestCase> prefixTestCases() {
         return Stream.of(
                 new InfixPrefixTestCase("!5;", "!", List.of(5L)),
