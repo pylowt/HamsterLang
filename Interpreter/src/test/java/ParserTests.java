@@ -162,9 +162,9 @@ public class ParserTests {
 
     static class InfixPrefixTestCase extends TestCase {
         String operator;
-        List<Integer> operands;
+        List<Object> operands;
 
-        InfixPrefixTestCase(String input, String operator, List<Integer> operands) {
+        InfixPrefixTestCase(String input, String operator, List<Object> operands) {
             super(input);
             this.operator = operator;
             this.operands = operands;
@@ -182,8 +182,10 @@ public class ParserTests {
 
     static Stream<InfixPrefixTestCase> prefixTestCases() {
         return Stream.of(
-                new InfixPrefixTestCase("!5;", "!", List.of(5)),
-                new InfixPrefixTestCase("-15;", "-", List.of(15))
+                new InfixPrefixTestCase("!5;", "!", List.of(5L)),
+                new InfixPrefixTestCase("-15;", "-", List.of(15L)),
+                new InfixPrefixTestCase("!true;", "!", List.of(true)),
+                new InfixPrefixTestCase("!false;", "!", List.of(false))
         );
     }
 
@@ -210,14 +212,14 @@ public class ParserTests {
 
     static Stream<InfixPrefixTestCase> infixTestCases() {
         return Stream.of(
-                new InfixPrefixTestCase("5 + 5;", "+", List.of(5, 5)),
-                new InfixPrefixTestCase("5 - 5;", "-", List.of(5, 5)),
-                new InfixPrefixTestCase("5 * 5;", "*", List.of(5, 5)),
-                new InfixPrefixTestCase("5 / 5;", "/", List.of(5, 5)),
-                new InfixPrefixTestCase("5 > 5;", ">", List.of(5, 5)),
-                new InfixPrefixTestCase("5 < 5;", "<", List.of(5, 5)),
-                new InfixPrefixTestCase("5 == 5;", "==", List.of(5, 5)),
-                new InfixPrefixTestCase("5 != 5;", "!=", List.of(5, 5))
+                new InfixPrefixTestCase("5 + 5;", "+", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 - 5;", "-", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 * 5;", "*", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 / 5;", "/", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 > 5;", ">", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 < 5;", "<", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 == 5;", "==", List.of(5L, 5L)),
+                new InfixPrefixTestCase("5 != 5;", "!=", List.of(5L, 5L))
         );
     }
 
@@ -238,9 +240,9 @@ public class ParserTests {
 
         assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
 
-        testIntegerLiteral(exp.getLeft(), tt.operands.get(0));
+        testIntegerLiteral(exp.getLeft(), (Long) tt.operands.get(0));
 
-        testIntegerLiteral(exp.getRight(), tt.operands.get(1));
+        testIntegerLiteral(exp.getRight(), (Long) tt.operands.get(1));
 
         testInfixExpression(exp, exp.getLeft(), exp.getOperator(), exp.getRight());
     }
@@ -261,7 +263,14 @@ public class ParserTests {
                 new OperatorPrecedenceTestCase("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
                 new OperatorPrecedenceTestCase("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"),
                 new OperatorPrecedenceTestCase("3 + 4 * 5 == 3 * 1 + 4 * 5",
-                        "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))")
+                        "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+                new OperatorPrecedenceTestCase("true", "true"),
+                new OperatorPrecedenceTestCase("false", "false"),
+                new OperatorPrecedenceTestCase("3 > 5 == false", "((3 > 5) == false)"),
+                new OperatorPrecedenceTestCase("3 < 5 == true", "((3 < 5) == true)"),
+                new OperatorPrecedenceTestCase("true == true", "(true == true)"),
+                new OperatorPrecedenceTestCase("false == false", "(false == false)"),
+                new OperatorPrecedenceTestCase("true != false", "(true != false)")
         );
     }
 
@@ -303,11 +312,14 @@ public class ParserTests {
         if (expected instanceof String expectedString) {
              testIdentifier(exp, expectedString);
         }
+        if (expected instanceof Boolean expectedBoolean) {
+            testBooleanLiteral(exp, expectedBoolean);
+        }
     }
 
     void testInfixExpression(Expression exp, Object left, String operator, Object right) {
 
-        assertInstanceOf(InfixExpression.class, exp, "Expression is not an InfixExpression, got " +
+        assertInstanceOf(InfixExpression.class, exp, "Expression not an InfixExpression, got " +
                 exp.getClass().getName());
 
         var infix = (InfixExpression) exp; // Safe cast after assertion
@@ -317,6 +329,17 @@ public class ParserTests {
         assertEquals(infix.getOperator(), operator);
 
         testLiteralExpression(infix.getRight(), right);
+    }
+
+    void testBooleanLiteral(Expression exp, boolean value) {
+        assertInstanceOf(BooleanLiteral.class, exp, "Expression not a BooleanLiteral, got " +
+                exp.getClass().getName());
+
+        BooleanLiteral bool = (BooleanLiteral) exp;  // Safe cast after assertion
+
+        assertEquals(value, bool.getValue(), "BooleanLiteral value not " + value + " got " + bool.getValue());
+
+        assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " + bool.tokenLiteral());
     }
 
 }
