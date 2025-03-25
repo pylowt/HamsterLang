@@ -190,7 +190,10 @@ public class ParserTests {
                 new InfixPrefixTestCase("5 > 5;", ">", List.of(5L, 5L)),
                 new InfixPrefixTestCase("5 < 5;", "<", List.of(5L, 5L)),
                 new InfixPrefixTestCase("5 == 5;", "==", List.of(5L, 5L)),
-                new InfixPrefixTestCase("5 != 5;", "!=", List.of(5L, 5L))
+                new InfixPrefixTestCase("5 != 5;", "!=", List.of(5L, 5L)),
+                new InfixPrefixTestCase("true == true", "==", List.of(true, true)),
+                new InfixPrefixTestCase("true != false", "!=", List.of(true, false)),
+                new InfixPrefixTestCase("false == false", "==", List.of(false, false))
         );
     }
 
@@ -210,10 +213,12 @@ public class ParserTests {
         InfixExpression exp = (InfixExpression) stmt.getExpression();
 
         assertEquals(tt.operator, exp.getOperator(), "exp.Operator does not match expected value");
-
-        testIntegerLiteral(exp.getLeft(), (Long) tt.operands.get(0));
-
-        testIntegerLiteral(exp.getRight(), (Long) tt.operands.get(1));
+        if (tt.operands.get(0) instanceof Long left) {
+            testIntegerLiteral(exp.getLeft(), left);
+        }
+        if (tt.operands.get(1) instanceof Long right) {
+            testIntegerLiteral(exp.getRight(), right);
+        }
 
         testInfixExpression(exp, exp.getLeft(), exp.getOperator(), exp.getRight());
     }
@@ -284,8 +289,8 @@ public class ParserTests {
         if (expected instanceof String expectedString) {
              testIdentifier(exp, expectedString);
         }
-        if (expected instanceof Boolean expectedBoolean) {
-            testBooleanLiteral(exp, expectedBoolean);
+        if (expected instanceof BooleanLiteral expectedBoolean) {
+            testBooleanLiteral(exp, expectedBoolean.getValue());
         }
     }
 
