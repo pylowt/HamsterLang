@@ -246,7 +246,12 @@ public class ParserTests {
                 new OperatorPrecedenceTestCase("3 < 5 == true", "((3 < 5) == true)"),
                 new OperatorPrecedenceTestCase("true == true", "(true == true)"),
                 new OperatorPrecedenceTestCase("false == false", "(false == false)"),
-                new OperatorPrecedenceTestCase("true != false", "(true != false)")
+                new OperatorPrecedenceTestCase("true != false", "(true != false)"),
+                new OperatorPrecedenceTestCase("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"),
+                new OperatorPrecedenceTestCase("(5 + 5) * 2", "((5 + 5) * 2)"),
+                new OperatorPrecedenceTestCase("2 / (5 + 5)", "(2 / (5 + 5))"),
+                new OperatorPrecedenceTestCase("-(5 + 5)", "(-(5 + 5))"),
+                new OperatorPrecedenceTestCase("!(true == true)", "(!(true == true))")
         );
     }
 
