@@ -53,6 +53,7 @@ public class Parser {
         prefixParseFns.put(TokenType.MINUS, parsePrefixExpressionFn);
         prefixParseFns.put(TokenType.TRUE, parseBooleanFn);
         prefixParseFns.put(TokenType.FALSE, parseBooleanFn);
+        prefixParseFns.put(TokenType.LPAREN, parseGroupedExpressionFn);
     }
 
     private void registerInfixFunctions() {
@@ -81,6 +82,7 @@ public class Parser {
     PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
     PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
     PrefixParseFn parseBooleanFn = this::parseBoolean;
+    PrefixParseFn parseGroupedExpressionFn = this::parseGroupedExpression;
 
     private @Nullable Expression parseIntegerLiteral() {
         tracer.trace("parseIntegerLiteral");
@@ -125,6 +127,15 @@ public class Parser {
 
     private @NotNull Expression parseBoolean() {
         return new BooleanLiteral(curToken, curTokenIs(TokenType.TRUE));
+    }
+
+    private @Nullable Expression parseGroupedExpression() {
+        nextToken();
+        var exp = parseExpression(Precedents.LOWEST.ordinal());
+        if (!expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        return exp;
     }
     private void nextToken()
     {
@@ -201,12 +212,12 @@ public class Parser {
     {
         var stmt = new VarStatement(curToken);
 
-        if (expectPeek(TokenType.IDENT))
+        if (!expectPeek(TokenType.IDENT))
             return null;
 
         stmt.name = new Identifier(curToken, curToken.Literal);
 
-        if (expectPeek(TokenType.ASSIGN))
+        if (!expectPeek(TokenType.ASSIGN))
             return null;
 
         // TODO: Skipping the expressions until encounter a semicolon
@@ -242,10 +253,10 @@ public class Parser {
         if (peekTokenIs(t))
         {
             nextToken();
-            return false;
+            return true;
         }
         PeekError(t);
-        return true;
+        return false;
     }
 
     private void PeekError(TokenType t)
