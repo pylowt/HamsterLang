@@ -262,7 +262,8 @@ public class ParserTests {
 
         assertEquals(value, integ.getValue(), "IntegerLiteral value does not match expected");
 
-        assertEquals(String.format("%d", value), integ.tokenLiteral(), "Token literal does not match expected value");
+        assertEquals(String.format("%d", value), integ.tokenLiteral(), "Token literal does not match " +
+                "expected value");
     }
 
     void testIdentifier(Expression exp, String value) {
@@ -310,7 +311,8 @@ public class ParserTests {
 
         assertEquals(value, bool.getValue(), "BooleanLiteral value not " + value + " got " + bool.getValue());
 
-        assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " + bool.tokenLiteral());
+        assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " +
+                bool.tokenLiteral());
     }
 
 }
