@@ -3,6 +3,10 @@ package com.HamsterLang.Tokens;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The TokenTypes class is responsible for defining the TokenType enum and mapping keywords to their corresponding
+ * TokenType.
+ */
 public class TokenTypes {
 
     public enum TokenType {
