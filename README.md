@@ -9,7 +9,10 @@ The project is currently in its developmental stages, primarily serving as a way
 
 
 **Current Status: In Development**
-Note: The interpreter is not yet functional as the parser and other core components are under construction. The code may not be 'production ready', as it serves as a learning tool.
+Note: The interpreter is not yet functional as the parser and other core components are under construction. The code may not be 'production ready', as it serves as a learning tool. 
+
+## Current Development
+Lexer is mostly complete. Parsing of integers and identfiers mostly complete.
 
 ## Features
 This is continuously being added to:
