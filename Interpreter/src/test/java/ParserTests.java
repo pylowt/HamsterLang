@@ -264,6 +264,39 @@ public class ParserTests {
         assertEquals(tt.expected, program.string());
     }
 
+    @Test
+    void TestIfExpression() {
+        var input = "if (x < y) { x }";
+
+        initialise(input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+
+        var ifExpression = (IfExpression) expressionStatement.getExpression();
+
+        assertInstanceOf(IfExpression.class, ifExpression);
+
+        testInfixExpression(ifExpression.getCondition(), "x", "<", "y");
+
+        assertEquals(1, ifExpression.getConsequence().statements.size());
+
+        var consequence = ifExpression.getConsequence().statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, consequence);
+
+        var consequenceExpression = (ExpressionStatement) consequence;
+
+        testIdentifier(consequenceExpression.getExpression(), "x");
+
+        assertNull(ifExpression.getAlternative());
+    }
+
     void testIntegerLiteral(Expression il, long value) {
 
         assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
@@ -325,6 +358,5 @@ public class ParserTests {
                 bool.tokenLiteral());
     }
 
+
 }
-
-
