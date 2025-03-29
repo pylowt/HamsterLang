@@ -297,6 +297,49 @@ public class ParserTests {
         assertNull(ifExpression.getAlternative());
     }
 
+    @Test
+    void testIfElseExpression() {
+        var input = "if (x < y) { x } else { y }";
+
+        initialise(input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+
+        var ifExpression = (IfExpression) expressionStatement.getExpression();
+
+        assertInstanceOf(IfExpression.class, ifExpression);
+
+        testInfixExpression(ifExpression.getCondition(), "x", "<", "y");
+
+        assertEquals(1, ifExpression.getConsequence().statements.size());
+
+        var consequence = ifExpression.getConsequence().statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, consequence);
+
+        var consequenceExpression = (ExpressionStatement) consequence;
+
+        testIdentifier(consequenceExpression.getExpression(), "x");
+
+        assertNotNull(ifExpression.getAlternative());
+
+        assertEquals(1, ifExpression.getAlternative().statements.size());
+
+        var alternative = ifExpression.getAlternative().statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, alternative);
+
+        var alternativeExpression = (ExpressionStatement) alternative;
+
+        testIdentifier(alternativeExpression.getExpression(), "y");
+    }
+
     void testIntegerLiteral(Expression il, long value) {
 
         assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
