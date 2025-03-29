@@ -55,6 +55,7 @@ public class Parser {
         prefixParseFns.put(TokenType.TRUE, parseBooleanFn);
         prefixParseFns.put(TokenType.FALSE, parseBooleanFn);
         prefixParseFns.put(TokenType.LPAREN, parseGroupedExpressionFn);
+        prefixParseFns.put(TokenType.IF, parseIfExpressionFn);
     }
 
     private void registerInfixFunctions() {
@@ -84,6 +85,7 @@ public class Parser {
     PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
     PrefixParseFn parseBooleanFn = this::parseBoolean;
     PrefixParseFn parseGroupedExpressionFn = this::parseGroupedExpression;
+    PrefixParseFn parseIfExpressionFn = this::parseIfExpression;
 
     public void setTracingEnabled(boolean enabled) {
         this.isTracingEnabled = enabled;
@@ -153,6 +155,44 @@ public class Parser {
             return null;
         }
         return exp;
+    }
+
+    private @Nullable Expression parseIfExpression() {
+        var expression = new IfExpression(curToken);
+        if (!expectPeek(TokenType.LPAREN)) {
+            return null;
+        }
+        nextToken();
+        expression.setCondition(parseExpression(Precedents.LOWEST.ordinal()));
+        if (!expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        if (!expectPeek(TokenType.LBRACE)) {
+            return null;
+        }
+        expression.setConsequence(parseBlockStatement());
+        if (peekTokenIs(TokenType.ELSE)) {
+            nextToken();
+            if (!expectPeek(TokenType.LBRACE)) {
+                return null;
+            }
+            expression.setAlternative(parseBlockStatement());
+        }
+
+        return expression;
+    }
+
+    private BlockStatement parseBlockStatement() {
+        var block = new BlockStatement(curToken);
+        nextToken();
+        while (!curTokenIs(TokenType.RBRACE) && !curTokenIs(TokenType.EOF)) {
+            var stmt = parseStatement();
+            if (stmt != null) {
+                block.statements.add(stmt);
+            }
+            nextToken();
+        }
+        return block;
     }
 
     private void nextToken()
@@ -307,5 +347,4 @@ public class Parser {
         }
         return Precedents.LOWEST.ordinal();
     }
-
 }
