@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,14 +49,15 @@ public class Parser {
     }
 
     private void registerPrefixFunctions() {
-        prefixParseFns.put(TokenType.IDENT, parseIdentifierFn);
-        prefixParseFns.put(TokenType.INT, parseIntegerLiteralFn);
-        prefixParseFns.put(TokenType.BANG, parsePrefixExpressionFn);
-        prefixParseFns.put(TokenType.MINUS, parsePrefixExpressionFn);
-        prefixParseFns.put(TokenType.TRUE, parseBooleanFn);
-        prefixParseFns.put(TokenType.FALSE, parseBooleanFn);
-        prefixParseFns.put(TokenType.LPAREN, parseGroupedExpressionFn);
-        prefixParseFns.put(TokenType.IF, parseIfExpressionFn);
+        prefixParseFns.put(TokenType.IDENT, () -> new Identifier(curToken, curToken.Literal));
+        prefixParseFns.put(TokenType.INT, this::parseIntegerLiteral);
+        prefixParseFns.put(TokenType.BANG, this::parsePrefixExpression);
+        prefixParseFns.put(TokenType.MINUS, this::parsePrefixExpression);
+        prefixParseFns.put(TokenType.TRUE, this::parseBoolean);
+        prefixParseFns.put(TokenType.FALSE, this::parseBoolean);
+        prefixParseFns.put(TokenType.LPAREN, this::parseGroupedExpression);
+        prefixParseFns.put(TokenType.IF, this::parseIfExpression);
+        prefixParseFns.put(TokenType.FUNCTION, this::parseFunctionLiteral);
     }
 
     private void registerInfixFunctions() {
@@ -80,12 +82,7 @@ public class Parser {
         precedences.put(TokenType.ASTERISK, Precedents.PRODUCT);
     }
 
-    PrefixParseFn parseIdentifierFn = () -> new Identifier(curToken, curToken.Literal);
-    PrefixParseFn parseIntegerLiteralFn = this::parseIntegerLiteral;
-    PrefixParseFn parsePrefixExpressionFn = this::parsePrefixExpression;
-    PrefixParseFn parseBooleanFn = this::parseBoolean;
-    PrefixParseFn parseGroupedExpressionFn = this::parseGroupedExpression;
-    PrefixParseFn parseIfExpressionFn = this::parseIfExpression;
+
 
     public void setTracingEnabled(boolean enabled) {
         this.isTracingEnabled = enabled;
@@ -157,43 +154,6 @@ public class Parser {
         return exp;
     }
 
-    private @Nullable Expression parseIfExpression() {
-        var expression = new IfExpression(curToken);
-        if (!expectPeek(TokenType.LPAREN)) {
-            return null;
-        }
-        nextToken();
-        expression.setCondition(parseExpression(Precedents.LOWEST.ordinal()));
-        if (!expectPeek(TokenType.RPAREN)) {
-            return null;
-        }
-        if (!expectPeek(TokenType.LBRACE)) {
-            return null;
-        }
-        expression.setConsequence(parseBlockStatement());
-        if (peekTokenIs(TokenType.ELSE)) {
-            nextToken();
-            if (!expectPeek(TokenType.LBRACE)) {
-                return null;
-            }
-            expression.setAlternative(parseBlockStatement());
-        }
-
-        return expression;
-    }
-
-    private BlockStatement parseBlockStatement() {
-        var block = new BlockStatement(curToken);
-        nextToken();
-        while (!curTokenIs(TokenType.RBRACE) && !curTokenIs(TokenType.EOF)) {
-            var stmt = parseStatement();
-            if (stmt != null) {
-                block.statements.add(stmt);
-            }
-            nextToken();
-        }
-        return block;
-    }
 
     private void nextToken()
     {
@@ -302,6 +262,76 @@ public class Parser {
             }
             return stmt;
         }
+
+    private @Nullable Expression parseIfExpression() {
+        var expression = new IfExpression(curToken);
+        if (!expectPeek(TokenType.LPAREN)) {
+            return null;
+        }
+        nextToken();
+        expression.setCondition(parseExpression(Precedents.LOWEST.ordinal()));
+        if (!expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        if (!expectPeek(TokenType.LBRACE)) {
+            return null;
+        }
+        expression.setConsequence(parseBlockStatement());
+        if (peekTokenIs(TokenType.ELSE)) {
+            nextToken();
+            if (!expectPeek(TokenType.LBRACE)) {
+                return null;
+            }
+            expression.setAlternative(parseBlockStatement());
+        }
+
+        return expression;
+    }
+
+    private BlockStatement parseBlockStatement() {
+        var block = new BlockStatement(curToken);
+        nextToken();
+        while (!curTokenIs(TokenType.RBRACE) && !curTokenIs(TokenType.EOF)) {
+            var stmt = parseStatement();
+            if (stmt != null) {
+                block.statements.add(stmt);
+            }
+            nextToken();
+        }
+        return block;
+    }
+
+    private @Nullable Expression parseFunctionLiteral() {
+        var lit = new FunctionLiteral(curToken);
+        if (!expectPeek(TokenType.LPAREN)) {
+            return null;
+        }
+        lit.setParameters(parseFunctionParameters());
+        if (!expectPeek(TokenType.LBRACE)) {
+            return null;
+        }
+        lit.setBody(parseBlockStatement());
+        return lit;
+    }
+
+    private List<Identifier> parseFunctionParameters() {
+        var identifiers = new ArrayList<Identifier>();
+        if (peekTokenIs(TokenType.RPAREN)) {
+            nextToken();
+            return identifiers;
+        }
+        nextToken();
+        identifiers.add(new Identifier(curToken, curToken.Literal));
+        while (peekTokenIs(TokenType.COMMA)) {
+            nextToken();
+            nextToken();
+            identifiers.add(new Identifier(curToken, curToken.Literal));
+        }
+        if (!expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        return identifiers;
+    }
 
     private boolean curTokenIs(TokenType t)
     {
