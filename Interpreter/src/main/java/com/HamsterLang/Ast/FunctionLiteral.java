@@ -6,11 +6,10 @@ import java.util.List;
 
 public class FunctionLiteral extends Expression{
     private final Token token; // The 'fn' token
-    private final List<Identifier> parameters;
+    private List<Identifier> parameters;
     private BlockStatement body;
 
-    public FunctionLiteral(List<Identifier> parameters, Token token) {
-        this.parameters = parameters;
+    public FunctionLiteral(Token token) {
         this.token = token;
     }
 
@@ -22,6 +21,13 @@ public class FunctionLiteral extends Expression{
         return token;
     }
 
+    public BlockStatement getBody() {
+        return body;
+    }
+
+    public void setParameters(List<Identifier> parameters) {
+        this.parameters = parameters;
+    }
     @Override
     public String tokenLiteral() {
         return token.Literal;
@@ -41,5 +47,9 @@ public class FunctionLiteral extends Expression{
         out.append(") ");
         out.append(body.string());
         return out.toString();
+    }
+
+    public void setBody(BlockStatement body) {
+        this.body = body;
     }
 }
