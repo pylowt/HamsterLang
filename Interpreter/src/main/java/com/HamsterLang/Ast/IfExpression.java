@@ -3,10 +3,14 @@ package com.HamsterLang.Ast;
 import com.HamsterLang.Tokens.Token;
 
 public class IfExpression extends Expression {
-    private Token token; // The 'if' token
+    private final Token token; // The 'if' token
     private Expression condition;
     private BlockStatement consequence;
     private BlockStatement alternative;
+
+    public IfExpression(Token token) {
+        this.token = token;
+    }
 
 
     public Expression getCondition() {
