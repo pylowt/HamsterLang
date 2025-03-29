@@ -4,7 +4,7 @@ import com.HamsterLang.Tokens.Token;
 
 public class Statement implements ASTNode {
 
-    public Identifier name;
+    private Identifier name;
     private final Token token;
 
     public Statement(Token token) {
@@ -13,7 +13,7 @@ public class Statement implements ASTNode {
 
     public Statement(Token token, Identifier name) {
         this.token = token;
-        this.name = name;
+        this.setName(name);
     }
 
     public String tokenLiteral() {
@@ -24,4 +24,11 @@ public class Statement implements ASTNode {
         return "";
     }
 
+    public Identifier getName() {
+        return name;
+    }
+
+    public void setName(Identifier name) {
+        this.name = name;
+    }
 }
