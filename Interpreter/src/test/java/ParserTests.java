@@ -376,6 +376,36 @@ public class ParserTests {
         testInfixExpression(((ExpressionStatement) bodyStmt).getExpression(), "x", "+", "y");
     }
 
+    static Stream<FunctionParsingTestCase> functionParameterTestCases() {
+        return Stream.of(
+                new FunctionParsingTestCase("func() {}", List.of()),
+                new FunctionParsingTestCase("func(x) {}", List.of("x")),
+                new FunctionParsingTestCase("func(x, y, z) {}", List.of("x", "y", "z"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("functionParameterTestCases")
+    void TestFunctionParameterParsing(FunctionParsingTestCase tt) {
+
+        initialise(tt.input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+
+        var function = (FunctionLiteral) expressionStatement.getExpression();
+
+        assertInstanceOf(FunctionLiteral.class, function);
+
+        assertEquals(function.getParameters().size(), tt.parameters.size(), "Length of parameters wrong. Want " +
+                tt.parameters.size() + ", got " + function.getParameters().size());
+    }
+
     void testIntegerLiteral(Expression il, long value) {
 
         assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
