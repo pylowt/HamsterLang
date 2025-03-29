@@ -9,7 +9,7 @@ public class Tracer {
     }
 
     public void tracePrint(String message){
-//        System.out.println(indentLevel() + message);
+        System.out.println(indentLevel() + message);
     }
 
     private void incIdent(){

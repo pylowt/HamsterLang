@@ -16,6 +16,7 @@ import java.util.Map;
  * It uses the lexer to get the tokens and then parse them to create the AST.
  */
 public class Parser {
+    private boolean isTracingEnabled = true;
     private final Lexer lexer;
     private Token curToken;
     private Token peekToken;
@@ -84,8 +85,14 @@ public class Parser {
     PrefixParseFn parseBooleanFn = this::parseBoolean;
     PrefixParseFn parseGroupedExpressionFn = this::parseGroupedExpression;
 
+    public void setTracingEnabled(boolean enabled) {
+        this.isTracingEnabled = enabled;
+    }
+
     private @Nullable Expression parseIntegerLiteral() {
-        tracer.trace("parseIntegerLiteral");
+        if (isTracingEnabled) {
+            tracer.trace("parseExpressionStatement");
+        }
         try {
             var lit = new IntegerLiteral(curToken);
             try {
@@ -96,24 +103,32 @@ public class Parser {
             }
             return lit;
         } finally {
-            tracer.untrace("parseIntegerLiteral");
+            if (isTracingEnabled) {
+                tracer.untrace("parseExpressionStatement");
+            }
         }
     }
 
     private @NotNull Expression parsePrefixExpression(){
-        tracer.trace("parsePrefixExpression");
+        if (isTracingEnabled) {
+            tracer.trace("parsePrefixExpression");
+        }
         try {
             var expression = new PrefixExpression(curToken, curToken.Literal);
             nextToken();
             expression.setRight(parseExpression(Precedents.PREFIX.ordinal()));
             return expression;
         } finally {
-            tracer.untrace("parsePrefixExpression");
+            if (isTracingEnabled) {
+                tracer.untrace("parsePrefixExpression");
+            }
         }
     }
 
     private @NotNull Expression parseInfixExpression(Expression left) {
-        tracer.trace("parseInfixExpression");
+        if (isTracingEnabled) {
+            tracer.trace("parseInfixExpression");
+        }
         try {
             var expression = new InfixExpression(curToken, curToken.Literal, left);
             var precedence = curPrecedence();
@@ -121,7 +136,9 @@ public class Parser {
             expression.setRight(parseExpression(precedence));
             return expression;
         } finally {
-            tracer.untrace("parseInfixExpression");
+            if (isTracingEnabled) {
+                tracer.untrace("parseInfixExpression");
+            }
         }
     }
 
@@ -137,13 +154,14 @@ public class Parser {
         }
         return exp;
     }
+
     private void nextToken()
     {
         curToken = peekToken;
         peekToken = lexer.nextToken();
     }
 
-    public ASTRoot parseProgram()
+    public @NotNull ASTRoot parseProgram()
     {
         var program = new ASTRoot();
 
@@ -169,8 +187,9 @@ public class Parser {
     }
 
     private @NotNull ExpressionStatement parseExpressionStatement() {
-//        TODO create a method that takes a Callable or Runnable and handles the tracing logic
-        tracer.trace("parseExpressionStatement");
+        if (isTracingEnabled) {
+            tracer.trace("parseExpressionStatement");
+        }
         try {
             var stmnt = new ExpressionStatement(curToken);
             var exp = parseExpression(Precedents.LOWEST.ordinal());
@@ -180,12 +199,16 @@ public class Parser {
             }
             return stmnt;
         } finally {
-            tracer.untrace("parseExpressionStatement");
+            if (isTracingEnabled) {
+                tracer.untrace("parseExpressionStatement");
+            }
         }
     }
 
     private @Nullable Expression parseExpression(int precedence) {
-        tracer.trace("parseExpression");
+        if (isTracingEnabled) {
+            tracer.trace("parseExpression");
+        }
         try {
             PrefixParseFn prefix = prefixParseFns.get(curToken.Type);
             if (prefix == null) {
@@ -204,7 +227,9 @@ public class Parser {
             }
             return leftExp;
         } finally {
-            tracer.untrace("parseExpression");
+            if (isTracingEnabled) {
+                tracer.untrace("parseExpression");
+            }
         }
     }
 

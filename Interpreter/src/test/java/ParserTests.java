@@ -21,6 +21,7 @@ public class ParserTests {
     public void initialise(String input) {
         var lexer = new Lexer(input);
         parser = new Parser(lexer);
+        parser.setTracingEnabled(false);
         program = parser.parseProgram();
         checkParserErrors();
     }
