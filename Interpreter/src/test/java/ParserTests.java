@@ -44,7 +44,7 @@ public class ParserTests {
         assertEquals(3, statements.size());
         for (int i = 0; i != expectedStatements.length; i++) {
             var statement = assertInstanceOf(VarStatement.class, statements.get(i));
-            assertEquals(expectedStatements[i], statement.name.getValue());
+            assertEquals(expectedStatements[i], statement.getName().getValue());
             assertEquals("var", statement.tokenLiteral());
         }
     }

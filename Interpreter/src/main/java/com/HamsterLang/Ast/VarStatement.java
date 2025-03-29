@@ -18,7 +18,7 @@ public class VarStatement extends Statement {
     public String string()
     {
         var outString = tokenLiteral() + " ";
-        if (name != null) outString += name.string();
+        if (getName() != null) outString += getName().string();
         outString += " = ";
         if (value != null) outString += value.string();
         outString += ";";

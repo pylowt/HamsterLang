@@ -215,7 +215,7 @@ public class Parser {
         if (!expectPeek(TokenType.IDENT))
             return null;
 
-        stmt.name = new Identifier(curToken, curToken.Literal);
+        stmt.setName(new Identifier(curToken, curToken.Literal));
 
         if (!expectPeek(TokenType.ASSIGN))
             return null;
