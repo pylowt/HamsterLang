@@ -341,6 +341,41 @@ public class ParserTests {
         testIdentifier(alternativeExpression.getExpression(), "y");
     }
 
+    @Test
+    void TestFunctionLiteralParsing() {
+        var input = "func(x, y) { x + y; }";
+
+        initialise(input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+
+        var function = (FunctionLiteral) expressionStatement.getExpression();
+
+        assertInstanceOf(FunctionLiteral.class, function);
+
+        assertEquals(2, function.getParameters().size(), "Function literal parameters wrong. Want 2, got " +
+                function.getParameters().size());
+
+        testLiteralExpression(function.getParameters().get(0), "x");
+
+        testLiteralExpression(function.getParameters().get(1), "y");
+
+        assertEquals(1, function.getBody().statements.size(), "Function body statements wrong. Want 1, got " +
+                function.getBody().statements.size());
+
+        var bodyStmt = function.getBody().statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, bodyStmt);
+
+        testInfixExpression(((ExpressionStatement) bodyStmt).getExpression(), "x", "+", "y");
+    }
+
     void testIntegerLiteral(Expression il, long value) {
 
         assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
@@ -401,6 +436,5 @@ public class ParserTests {
         assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " +
                 bool.tokenLiteral());
     }
-
 
 }
