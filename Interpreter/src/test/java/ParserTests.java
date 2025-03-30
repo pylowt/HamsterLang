@@ -406,6 +406,36 @@ public class ParserTests {
                 tt.parameters.size() + ", got " + function.getParameters().size());
     }
 
+    @Test
+    void TestCallExpressionParsing() {
+        var input = "add(1, 2 * 3, 4 + 5);";
+
+        initialise(input);
+
+        assertEquals(1, program.statements.size());
+
+        var stmt = program.statements.get(0);
+
+        assertInstanceOf(ExpressionStatement.class, stmt);
+
+        var expressionStatement = (ExpressionStatement) stmt;
+
+        var call = (CallExpression) expressionStatement.getExpression();
+
+        assertInstanceOf(CallExpression.class, call);
+
+        testIdentifier(call.getFunction(), "add");
+
+        assertEquals(3, call.getArguments().length, "Length of arguments wrong. Want 3, got " +
+                call.getArguments().length);
+
+        testLiteralExpression(call.getArguments()[0], 1L);
+
+        testInfixExpression(call.getArguments()[1], 2L, "*", 3L);
+
+        testInfixExpression(call.getArguments()[2], 4L, "+", 5L);
+    }
+
     void testIntegerLiteral(Expression il, long value) {
 
         assertInstanceOf(IntegerLiteral.class, il, "Expression is not an IntegerLiteral");
@@ -466,5 +496,4 @@ public class ParserTests {
         assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " +
                 bool.tokenLiteral());
     }
-
 }
