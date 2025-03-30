@@ -466,5 +466,4 @@ public class ParserTests {
         assertEquals(String.valueOf(value), bool.tokenLiteral(), "Token literal not " + value + " got " +
                 bool.tokenLiteral());
     }
-
 }
